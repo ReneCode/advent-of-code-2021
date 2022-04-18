@@ -43,7 +43,9 @@ factory = Factory(start_timer)
 factory.print()
 
 days = 80
+
 for i in range(days):
   factory.tick()
+  print(f'After day {i+1}: {len(factory.fishes)}')
+
   # factory.print()
-print(len(factory.fishes))
