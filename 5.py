@@ -68,7 +68,8 @@ def count_more_than(board, nr):
 # advent_of_code_2021/5-example.data
 input_data = util.read_data('./5.data')
 cmds = parse_lines(input_data)
-cmds = remove_diagonal(cmds)
+# only for part a
+# cmds = remove_diagonal(cmds)
 (max_x, max_y) = get_max_dimension(cmds)
 board = [ [0]*(max_x+1) for _ in range(max_y+1) ]
 
