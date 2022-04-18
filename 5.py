@@ -1,13 +1,5 @@
 
-from util import read_data
-
-# def read_data(filename):
-#   input_data = []
-#   with open(filename) as f:
-#       lines = f.readlines()
-#       input_data = [l.strip() for l in lines]
-#   return input_data
-
+import util
 
 def parse_lines(lines):
   cmds = []
@@ -50,12 +42,31 @@ def debug_board(board):
 def add_cmd(board, cmd):
   [x0, y0] = cmd[0]
   [x1, y1] = cmd[1]
-  board[y0][x0] = board[y0][x0] + 1
-  board[y1][x1] = board[y1][x1] + 1
+
+  cnt_x = x1 - x0
+  cnt_y = y1 - y0
+  cnt = max(abs(cnt_x), abs(cnt_y))
+  dx = int(cnt_x / cnt)
+  dy = int(cnt_y / cnt)
+  x = x0
+  y = y0
+  for i in range(cnt+1):
+    board[y][x] = board[y][x] + 1
+    x = x + dx
+    y = y + dy
+
+def count_more_than(board, nr):
+  cnt = 0
+  for row in board:
+    for val in row:
+      if val > nr:
+        cnt = cnt +1
+  return cnt
+
 
 
 # advent_of_code_2021/5-example.data
-input_data = read_data('./advent_of_code_2021/5-example.data')
+input_data = util.read_data('./5.data')
 cmds = parse_lines(input_data)
 cmds = remove_diagonal(cmds)
 (max_x, max_y) = get_max_dimension(cmds)
@@ -65,8 +76,14 @@ board = [ [0]*(max_x+1) for _ in range(max_y+1) ]
 for cmd in cmds:
   add_cmd(board, cmd)
 
-print(cmds)
+
+result = count_more_than(board, 1)
+
+# print(cmds)
 debug_board(board)
+print(result)
+
+
 
 
 
