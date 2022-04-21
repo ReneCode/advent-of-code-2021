@@ -16,21 +16,44 @@ def get_start_positions():
     positions[pos] = positions[pos] +1
   return positions
 
+cache_costs = {}
+
+def calc_costs(delta):
+  cost = cache_costs.get(delta)
+  if cost != None:
+    return cost
+
+  cost = 0
+  for i in range(delta):
+    cost = cost + (i+1)
+  cache_costs[delta] = cost
+  return cost
+
+
 def calc_moving_costs(positions, target_pos):
   total = 0
   for i, count in enumerate(positions):
-    single_cost = abs(i - target_pos)
+    # part 1
+    # single_cost = abs(i - target_pos)
+
+    # part 2
+    delta = abs(i - target_pos)
+    single_cost = calc_costs(delta)  
+
     total = total + count * single_cost
   return total
 
+# position[index] = count of crabs on that index position
 positions = get_start_positions()
 min_cost = -1
-for pos in range(len(positions)):
+cnt = len(positions)
+for pos in range(cnt):
   cost = calc_moving_costs(positions, pos)
+  print(f'{pos}/{cnt} {cost}')
   if min_cost < 0:
     min_cost = cost
   else:
     min_cost = min(min_cost, cost)
 
-print(positions)
+# print(positions)
 print(min_cost)
