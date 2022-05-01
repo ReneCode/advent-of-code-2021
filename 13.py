@@ -61,7 +61,7 @@ def fold_x(board, x_fold):
     check = row[x_fold]
     if check:
       raise Exception(f'val on fold line {x_fold} not empty')
-    new_row = [False] * x_fold
+    new_row = row[:x_fold]
     dx = 1
     while x_fold + dx < old_x_max:
       left = row[x_fold -dx]
@@ -82,15 +82,14 @@ def merge_rows(row_a, row_b):
 
 def fold_y(board, y_fold):
   old_y_max = len(board)
-  # y_max = old_y_max // 2
-  # if y_max != y_fold:
-  #   raise Exception(f'fold_y {y_fold} but calc {y_max}')
-  new_board = []
-  for y in range(y_fold):
-    row_top = board[y]
-    row_bottom = board[old_y_max -1 -y]
-    row_result = merge_rows(row_top, row_bottom)
-    new_board.append(row_result)
+  new_board = board[:y_fold]
+  dy = 1
+  while y_fold + dy < old_y_max:
+    row_up = board[y_fold -dy]
+    row_down = board[y_fold +dy]
+    row_result = merge_rows(row_up, row_down)
+    new_board[y_fold -dy] = row_result
+    dy = dy +1
   return new_board
 
 
@@ -105,4 +104,4 @@ for fold in folds:
   else:
     board = fold_y(board, fold[1])
   debug(board)
-  exit()
+  # exit()
