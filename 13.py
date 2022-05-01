@@ -6,7 +6,7 @@ import util
 
 
 def read_data():
-  lines = util.read_data('./13-example.data')
+  lines = util.read_data('./13.data')
   dots = []
   folds = []
 
@@ -56,18 +56,19 @@ def debug(board):
 
 def fold_x(board, x_fold):
   old_x_max = len(board[0])
-  # x_max = old_x_max // 2
-  # if x_max != x_fold:
-  #   raise Exception(f'fold_x {x_fold} but calc {x_max}')
   new_board = []
   for row in board:
     check = row[x_fold]
     if check:
       raise Exception(f'val on fold line {x_fold} not empty')
-    new_row = []
-    for x in range(x_fold):
-      val = row[x] or row[old_x_max -1 -x]
-      new_row.append(val)
+    new_row = [False] * x_fold
+    dx = 1
+    while x_fold + dx < old_x_max:
+      left = row[x_fold -dx]
+      right = row[x_fold +dx]
+      result = left or right
+      new_row[x_fold -dx] = result
+      dx = dx+1
     new_board.append(new_row)
   return new_board
 
