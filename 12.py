@@ -22,6 +22,9 @@ class Node:
   def can_visit_once(self):
     return self.name == self.name.lower()
 
+  def is_start(self):
+    return self.name == 'start'
+
   def is_end(self):
     return self.name == 'end'
 
@@ -57,13 +60,23 @@ class Nodes:
 
 
 def visit(ways, node, way):
-  if node.can_visit_once():
-    if node in way:
-      return
-  way.append(node)
+  if len(way) > 0 and node.is_start():
+    return
   if node.is_end():
+    way.append(node)
     ways.append(way)
     return
+
+  if node.can_visit_once():
+    if node in way:
+      for way_node in way:
+        if way_node.can_visit_once():
+          cnt = sum([1 for n in way if way_node == n])
+        if cnt == 2:
+          # sorry allready a visit_once-node twice in the waz
+          return
+
+  way.append(node)
   for target_node in node.target_nodes:
     visit(ways, target_node, way.copy())
 
@@ -83,6 +96,7 @@ ways = []
 
 get_ways(nodes, ways)
 
-
+for way in ways:
+  print(','.join([n.name for n in way]))
 print(len(ways))
 
