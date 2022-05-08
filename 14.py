@@ -4,7 +4,7 @@
 import util
 
 def read_data():
-  lines = util.read_data('./14.data')
+  lines = util.read_data('./14-example.data')
   start = ''
   rules = {}
   for line in lines:
@@ -54,7 +54,7 @@ def calc_score(polymer):
 
 (polymer, rules) = read_data()
 print(polymer)
-for i in range(10):
+for i in range(40):
   polymer = step(polymer, rules)
   score = calc_score(polymer)
-  print(f'After step {i+1}: {polymer} {score}')
+  print(f'After step {i+1}: {polymer[0:10]} {len(polymer)} {score}')
