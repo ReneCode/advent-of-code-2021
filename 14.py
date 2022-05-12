@@ -36,6 +36,7 @@ def calc_score(polymer):
       stats[w] = 1
     else:
       stats[w] = val +1
+  print(stats)
   min_cnt = None
   max_cnt = None
   for item in stats.items():
@@ -54,7 +55,7 @@ def calc_score(polymer):
 
 (polymer, rules) = read_data()
 print(polymer)
-for i in range(40):
+for i in range(10):
   polymer = step(polymer, rules)
   score = calc_score(polymer)
-  print(f'After step {i+1}: {polymer[0:10]} {len(polymer)} {score}')
+  print(f'After step {i+1}: {polymer[:20]}  {score}')

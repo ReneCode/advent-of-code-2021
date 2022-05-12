@@ -20,7 +20,6 @@ class Polymer:
     result = f'{self.name} - {self.generations}/{self.char_counts}'
     return result
 
-
   def __init__(self, name):
     self.name = name
     self.generations = [] # string for each generation
@@ -34,10 +33,22 @@ class Polymer:
         polymer = self.generations[i-1]
       result = step(polymer, rules)
       self.generations.append(result)
+      # do not count the right most char
       counts = get_char_counts(polymer)
       self.char_counts.append(counts)
 
+  # abc => { b:1, c:1 }
+  def get_right_counts(self, generation):
+    poly = self.generations[generation]
+    key = poly[:1]
+    counts = self.char_counts[generation]
+    counts[key] = counts[key] -1
+    return counts
 
+  # abc => { a:1, b:1  c:1 }
+  def get_full_counts(self, generation):
+    counts = self.char_counts[generation]
+    return counts
 
 def step(polymer, rules):
   result = ''
@@ -62,17 +73,28 @@ def get_char_counts(polymer):
       counts[w] = val +1
   return counts
 
-def calc_score(polymer):
-  stats = {}
-  for w in polymer:
-    val = stats.get(w)
-    if val == None:
-      stats[w] = 1
-    else:
-      stats[w] = val +1
+
+def polymer_to_pairs(polymer):
+  l = len(polymer)
+  pairs = []
+  for i in range(l-1):
+    s = polymer[i:i+2]
+    pairs.append(s)
+  return pairs
+
+def merge_dicts(a, b):
+  result = a.copy()
+  for key,val in b.items():
+    v = result.get(key)
+    if v == None:
+      v = 0
+    result[key] = val + v
+  return result
+
+def calc_score(counts):
   min_cnt = None
   max_cnt = None
-  for item in stats.items():
+  for item in counts.items():
     (_, cnt) = item
     if min_cnt == None:
       min_cnt = cnt
@@ -86,65 +108,33 @@ def calc_score(polymer):
 
 
 
-def polymer_to_pairs(polymer):
-  l = len(polymer)
-  pairs = []
-  for i in range(l-1):
-    s = polymer[i:i+2]
-    pairs.append(s)
-  return pairs
-
-
-# def traverse(target_len, pair, tree, result, depth):
-#   if target_len == depth:
-#     result.append(pair[0])
-#     pass
-#   else:
-#     (left,right) = tree[pair]
-#     traverse(target_len, left, tree, result, depth+1)
-#     traverse(target_len, right, tree, result, depth+1)
-
-
 (start_polymer, rules) = read_data()
-start_polymer = 'CB'
 
 polymers = {}
+PRE_CALC_STEPS = 10
 for rule in rules:
   polymer = Polymer(rule)
-  polymer.calc_generations(5, rules)
+  polymer.calc_generations(PRE_CALC_STEPS, rules)
   polymers[rule] = polymer
 
-print(polymers)
+steps = 8
+pairs = polymer_to_pairs(start_polymer)
+result = ''
+counts = {}
+first = True
+for pair in pairs:
+  polymer = polymers[pair]
+  part_counts = {}
+  if first:
+    first = False
+    part_counts = polymer.get_full_counts(steps)
+  else:
+    part_counts = polymer.get_right_counts(steps)
+  print(pair, part_counts)
+  counts = merge_dicts(counts, part_counts)
+
+print(start_polymer)
+score = calc_score(counts)
+print(f'after {steps} steps: {counts} Score {score}')
 
 
-
-# rule = CB -> H
-#
-# key = 'CB'  value = (CH,HB)
-# tree = {}
-# for key,value in rules.items():
-#   left = key[0] + value
-#   right = value + key[1]
-#   tree[key] = (left, right)
-
-# print(tree)
-# pairs = polymer_to_pairs(polymer)
-# print(pairs)
-
-# result = []
-# steps = 3
-# for pair in pairs:
-#   traverse(steps, pair, tree, result, 0)
-# result.append(pair[-1])
-
-# finish_polymer = ''.join(result)
-# print(finish_polymer)
-# score = calc_score(finish_polymer)
-# print(f'score:{score}')
-
-
-
-# for i in range(10):
-#   polymer = step(polymer, rules)
-# score = calc_score(polymer)
-# print(f'After step {i+1}: {polymer[0:10]} {len(polymer)} {score}')
