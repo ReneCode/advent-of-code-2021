@@ -123,7 +123,7 @@ def calc_next_polymer(polymer, rules):
 
 polymers = {}
 PRE_CALC_STEPS = 20
-print(f'precalc initial {PRE_CALC_STEPS} rules')
+print(f'precalc {PRE_CALC_STEPS} steps for the basic rules')
 for rule in rules:
   polymer = Polymer(rule)
   polymer.calc_generations(PRE_CALC_STEPS, rules)
@@ -132,11 +132,12 @@ for rule in rules:
 
 # calc first 20 steps
 init_steps = 20
-print(f'calc initial {init_steps} steps for the polynom {start_polymer}')
+print(f'calc initial {init_steps} steps for the polynom {start_polymer} (like part-1)')
 for i in range(init_steps):
   start_polymer = calc_next_polymer(start_polymer, rules)
 
-# print(f'start polymer {start_polymer}')
+
+print(f'calc pairs of a polynom with len {len(start_polymer)}')
 
 steps = 20
 pairs = polymer_to_pairs(start_polymer)
@@ -144,7 +145,7 @@ result = ''
 counts = {}
 first = True
 for pair in pairs:
-  print(f'calc pair {pair}')
+  # print(f'calc pair {pair}')
   polymer = polymers[pair]
   part_counts = {}
   if first:
@@ -155,7 +156,6 @@ for pair in pairs:
   # print(pair, part_counts)
   counts = merge_dicts(counts, part_counts)
 
-print(f'len of start_polynom {len(start_polymer)}')
 score = calc_score(counts)
 print(f'after {steps + init_steps} steps: {counts} Score {score}')
 
