@@ -4,7 +4,7 @@
 import util
 
 def read_data():
-  lines = util.read_data('./14-example.data')
+  lines = util.read_data('./14.data')
   start = ''
   rules = {}
   for line in lines:
@@ -31,24 +31,25 @@ class Polymer:
       polymer = self.name
       if i>0:
         polymer = self.generations[i-1]
-      result = step(polymer, rules)
-      self.generations.append(result)
+      polymer = step(polymer, rules)
+      self.generations.append(polymer)
       # do not count the right most char
       counts = get_char_counts(polymer)
       self.char_counts.append(counts)
 
   # abc => { b:1, c:1 }
   def get_right_counts(self, generation):
-    poly = self.generations[generation]
+    poly = self.generations[generation-1]
     key = poly[:1]
-    counts = self.char_counts[generation]
-    counts[key] = counts[key] -1
-    return counts
+    counts = self.char_counts[generation-1]
+    result = counts.copy()
+    result[key] = result[key] -1
+    return result
 
   # abc => { a:1, b:1  c:1 }
   def get_full_counts(self, generation):
-    counts = self.char_counts[generation]
-    return counts
+    counts = self.char_counts[generation-1]
+    return counts.copy()
 
 def step(polymer, rules):
   result = ''
@@ -106,23 +107,44 @@ def calc_score(counts):
       max_cnt = max(max_cnt, cnt)
   return max_cnt - min_cnt
 
-
+def calc_next_polymer(polymer, rules):
+  result = ''
+  poly_len = len(polymer)
+  for i in range(poly_len-1):
+    pair = polymer[i:i+2]
+    result = result + pair[0]
+    insert = rules.get(pair)
+    if insert != None:
+      result = result + insert
+  result = result + polymer[-1]
+  return result
 
 (start_polymer, rules) = read_data()
 
 polymers = {}
-PRE_CALC_STEPS = 10
+PRE_CALC_STEPS = 20
+print(f'precalc initial {PRE_CALC_STEPS} rules')
 for rule in rules:
   polymer = Polymer(rule)
   polymer.calc_generations(PRE_CALC_STEPS, rules)
   polymers[rule] = polymer
 
-steps = 8
+
+# calc first 20 steps
+init_steps = 20
+print(f'calc initial {init_steps} steps for the polynom {start_polymer}')
+for i in range(init_steps):
+  start_polymer = calc_next_polymer(start_polymer, rules)
+
+# print(f'start polymer {start_polymer}')
+
+steps = 20
 pairs = polymer_to_pairs(start_polymer)
 result = ''
 counts = {}
 first = True
 for pair in pairs:
+  print(f'calc pair {pair}')
   polymer = polymers[pair]
   part_counts = {}
   if first:
@@ -130,11 +152,11 @@ for pair in pairs:
     part_counts = polymer.get_full_counts(steps)
   else:
     part_counts = polymer.get_right_counts(steps)
-  print(pair, part_counts)
+  # print(pair, part_counts)
   counts = merge_dicts(counts, part_counts)
 
-print(start_polymer)
+print(f'len of start_polynom {len(start_polymer)}')
 score = calc_score(counts)
-print(f'after {steps} steps: {counts} Score {score}')
+print(f'after {steps + init_steps} steps: {counts} Score {score}')
 
 

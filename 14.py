@@ -55,7 +55,7 @@ def calc_score(polymer):
 
 (polymer, rules) = read_data()
 print(polymer)
-for i in range(10):
+for i in range(20):
   polymer = step(polymer, rules)
   score = calc_score(polymer)
   print(f'After step {i+1}: {polymer[:20]}  {score}')
