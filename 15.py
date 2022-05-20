@@ -1,6 +1,7 @@
 
 # https://adventofcode.com/2021/day/15
 
+import sys
 import util
 import random
 
@@ -15,8 +16,8 @@ def read_data():
 
 
 class Way:
-  def __init__(self):
-    self.points = []
+  def __init__(self, points):
+    self.points = points
 
 
   
@@ -27,18 +28,17 @@ class Way:
 class WayFinder:
   def __init__(self, board):
     self.ways = []
-    self.visited_points = {}
+    self.visited_risk = {}
     self.board = board
     (xlen, ylen) = self.calc_shape()
     self.start_pt = (0,0)
     self.end_pt = (xlen-1, ylen-1)
 
-  def calc_all_ways(self):
-    pt = self.start_pt
-    way = []
-    # self.init_visited_points()
-    self.step(way, self.start_pt)
-    return self.ways
+  # def calc_all_ways(self):
+  #   pt = self.start_pt
+  #   way = []
+  #   self.step(way, self.start_pt)
+  #   return self.ways
 
   def get_risk(self, pt):
     if pt == self.start_pt:
@@ -50,7 +50,13 @@ class WayFinder:
     return (len(self.board[0]), len(self.board))
 
   def get_visited_risk(self,pt):
-    return self.visited_points[pt]
+    return self.visited_risk.get(pt)
+
+  def set_visited_risk(self, pt, risk):
+    existing_risk = self.visited_risk.get(pt)
+    if existing_risk != None and risk >= existing_risk:
+      raise Exception(f'risk on point {pt} alleady set {existing_risk}. Do not override with {risk}')
+    self.visited_risk[pt] = risk
 
   def get_bottom_right_points(self, pt):
     (x, y) = pt
@@ -77,15 +83,47 @@ class WayFinder:
     risk_b = self.get_visited_risk(result[1])
     return min(risk_a, risk_b)
 
-  def init_visited_points(self):
+
+
+  def enter(self, points, pt, total_risk):
+    if pt in points:
+      return
+    total_risk = total_risk + self.get_risk(pt)
+    risk = self.get_visited_risk(pt)
+    if risk != None:
+      if total_risk >= risk:
+        # not better -> stop
+        return
+    self.set_visited_risk(pt, total_risk)
+    points.append(pt)
+    if pt == self.end_pt:
+      self.ways.append(points.copy())
+      print(len(self.ways))
+      self.out_way(points)
+      return
+    # next_points = self.get_bottom_right_points(pt)
+    next_points = self.get_next_points(pt)
+
+    for p in next_points:
+      self.enter(points.copy(), p, total_risk)
+
+
+  def calc_first_way(self):
+    points = []
+    self.enter(points, self.start_pt, 0)
+
+
+
+  def init_visited_risk(self):
     (xlen, ylen) = self.calc_shape()
-    self.visited_points[self.start_pt] = 0
     for x in range(xlen):
       for y in range(ylen):
         pt = (x,y)
         top_left_risk = self.get_top_left_visited_risk(pt)
         my_risk = self.get_risk(pt)
-        self.visited_points[pt] = top_left_risk + my_risk +1
+        my_visited_risk = self.get_visited_risk(pt)
+        total_risk = top_left_risk + my_risk + 1
+        self.set_visited_risk(pt, total_risk)
 
 
   def get_next_points(self, pt):
@@ -115,16 +153,16 @@ class WayFinder:
           line = line + '.'
       print(line)
 
-  def step(self, way, pt):
-    way.append(pt)
-    if pt == self.end_pt:
-      self.ways.append(way.copy())
-      # self.out_way(way)
-      return
-    next_pts = self.get_bottom_right_points(pt)
-    for next_pt in next_pts:
-      if not next_pt in way:
-        self.step(way.copy(), next_pt)
+  # def step(self, way, pt):
+  #   way.append(pt)
+  #   if pt == self.end_pt:
+  #     self.ways.append(way.copy())
+  #     # self.out_way(way)
+  #     return
+  #   next_pts = self.get_bottom_right_points(pt)
+  #   for next_pt in next_pts:
+  #     if not next_pt in way:
+  #       self.step(way.copy(), next_pt)
 
   def calc_risk(self, way):
     total_risk = 0
@@ -145,12 +183,13 @@ class WayFinder:
 
 
 
-
+sys.setrecursionlimit(10000+100)
 
 board = read_data()
 way_finder = WayFinder(board)
-ways = way_finder.calc_all_ways()
+way_finder.init_visited_risk()
+way_finder.calc_first_way()
+# ways = way_finder.calc_all_ways()
 (min_risk, min_way) = way_finder.calc_min_risk_of_all_ways()
-print(len(ways))
 way_finder.out_way(min_way)
-print(min_risk)
+print(len(way_finder.ways), min_risk)
