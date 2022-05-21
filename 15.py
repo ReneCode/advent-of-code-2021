@@ -7,22 +7,97 @@ import random
 
 def read_data():
   board = []
-  lines = util.read_data('./15.data')
+  lines = util.read_data('./15-example.data')
   for line in lines:
     row = [int(n) for n in line]
     board.append(row)
   return board
 
+def out_board(board):
+  print('-----------')
+  for row in board:
+    line = ''.join([str(n) for n in row])
+    print(line)
 
+
+
+def test_blowup_board():
+  board = [[1,2],[3,4]]
+  result = blowup_board(board, 3)
+  print(result)
+  assert len(result) == 6
+  assert len(result[0]) == 6
+  row = result[0]
+  # assert row == [1,2,2,3,3,4]
+
+
+def test_insert_board():
+  board = [[1,2],[3,8]]
+  expect_2 = [ 
+    [1,2,2,3],
+    [3,8,4,9],
+    [2,3,3,4],
+    [4,9,5,1]
+  ]
+  expect_3 = [ 
+    [1,2,2,3,3,4],
+    [3,8,4,9,5,1],
+    [2,3,3,4,4,5],
+    [4,9,5,1,6,2],
+    [3,4,4,5,5,6],
+    [5,1,6,2,7,3]
+  ]
+  assert blowup_board(board, 2) == expect_2
+  assert blowup_board(board, 3) == expect_3
+
+
+def test_inc_val():
+  assert inc_val(7, 3) == 1
+
+def test_copy_row():
+  assert copy_row([1,2], 3, 0) == [1,2,2,3,3,4]
+  assert copy_row([1,2], 3, 1) == [2,3,3,4,4,5]
+  assert copy_row([1,2], 3, 7) == [8,9,9,1,1,2]
+
+
+def inc_val(v, times):
+  val = v
+  for i in range(times):
+    val = val +1
+    if val > 9:
+      val = 1
+  return val
+
+def copy_row(row, times, inc):
+  row_len = len(row)
+  target = []
+  for i in range(times):
+    for v in row:
+      val = inc_val(v, i + inc)
+      target.append(val)
+  return target
+
+
+
+def blowup_board(board, times):
+  xlen = len(board[0])
+  ylen = len(board)
+  result_board = []
+  for i_board in range(times):
+    for row in board:
+      result_row = copy_row(row, times, i_board)
+      result_board.append(result_row)
+
+  #   row = [None] * (xlen * multiply_factor)
+  #   result_board.append(row)
+  # for yidx in range(multiply_factor):
+  #   for xidx in range(multiply_factor):
+  #     insert_inc_board(result_board, board, (xlen,ylen), xidx, yidx, xidx)
+  return result_board
 
 class Way:
   def __init__(self, points):
     self.points = points
-
-
-  
-
-
 
 
 class WayFinder:
@@ -184,12 +259,26 @@ class WayFinder:
 
 
 sys.setrecursionlimit(10000+100)
+def part_1():
+  board = read_data()
+  way_finder = WayFinder(board)
+  way_finder.init_visited_risk()
+  way_finder.calc_first_way()
+  # ways = way_finder.calc_all_ways()
+  (min_risk, min_way) = way_finder.calc_min_risk_of_all_ways()
+  way_finder.out_way(min_way)
+  print(len(way_finder.ways), min_risk)
 
-board = read_data()
-way_finder = WayFinder(board)
-way_finder.init_visited_risk()
-way_finder.calc_first_way()
-# ways = way_finder.calc_all_ways()
-(min_risk, min_way) = way_finder.calc_min_risk_of_all_ways()
-way_finder.out_way(min_way)
-print(len(way_finder.ways), min_risk)
+def part_2():
+  board = read_data()
+  board = blowup_board(board, 5)
+  out_board(board)
+  # way_finder = WayFinder(board)
+  # way_finder.init_visited_risk()
+  # way_finder.calc_first_way()
+  # # ways = way_finder.calc_all_ways()
+  # (min_risk, min_way) = way_finder.calc_min_risk_of_all_ways()
+  # way_finder.out_way(min_way)
+  # print(len(way_finder.ways), min_risk)
+
+part_2()
