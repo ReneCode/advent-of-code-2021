@@ -7,7 +7,7 @@ import random
 
 def read_data():
   board = []
-  lines = util.read_data('./15-example.data')
+  lines = util.read_data('./15.data')
   for line in lines:
     row = [int(n) for n in line]
     board.append(row)
@@ -174,7 +174,7 @@ class WayFinder:
     if pt == self.end_pt:
       self.ways.append(points.copy())
       print(len(self.ways))
-      self.out_way(points)
+      # self.out_way(points)
       return
     # next_points = self.get_bottom_right_points(pt)
     next_points = self.get_next_points(pt)
@@ -258,8 +258,8 @@ class WayFinder:
 
 
 
-sys.setrecursionlimit(10000+100)
 def part_1():
+  sys.setrecursionlimit(10000+100)
   board = read_data()
   way_finder = WayFinder(board)
   way_finder.init_visited_risk()
@@ -270,15 +270,17 @@ def part_1():
   print(len(way_finder.ways), min_risk)
 
 def part_2():
+  sys.setrecursionlimit(500*500+100)
   board = read_data()
   board = blowup_board(board, 5)
   out_board(board)
-  # way_finder = WayFinder(board)
-  # way_finder.init_visited_risk()
-  # way_finder.calc_first_way()
-  # # ways = way_finder.calc_all_ways()
-  # (min_risk, min_way) = way_finder.calc_min_risk_of_all_ways()
-  # way_finder.out_way(min_way)
-  # print(len(way_finder.ways), min_risk)
+  way_finder = WayFinder(board)
+  way_finder.init_visited_risk()
+  way_finder.calc_first_way()
+  # ways = way_finder.calc_all_ways()
+  (min_risk, min_way) = way_finder.calc_min_risk_of_all_ways()
+  print('=============')
+  way_finder.out_way(min_way)
+  print(len(way_finder.ways), min_risk)
 
-part_2()
+part_1()
