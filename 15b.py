@@ -107,7 +107,7 @@ class DijkstraWayFinder:
   def __init__(self, board):
     self.ways = []
     self.waiting_points = []
-    self.visited_points = []
+    self.visited_points = {}
     self.table = {}
     self.board = board
     (xlen, ylen) = self.calc_shape()
@@ -158,7 +158,10 @@ class DijkstraWayFinder:
     self.waiting_points.remove(pt)
 
   def add_visited(self, pt):
-    self.visited_points.append(pt)
+    self.visited_points[pt] = True
+
+  def is_visited(self, pt):
+    return self.visited_points.get(pt) != None
 
   def get_waiting(self):
     # get waiting with min costs
@@ -172,14 +175,16 @@ class DijkstraWayFinder:
 
 
   def calc(self):
+    cnt = 0
     self.add_waiting(self.start_pt)
     while len(self.waiting_points) > 0:
-      if len(self.visited_points) % 1000 == 0:
-        print(f'visited: {len(self.visited_points)}')
+      cnt = cnt+1
+      if cnt % 1000 == 0:
+        print(f'cnt: {cnt}')
       current_item = self.get_waiting()
       next_points = self.get_next_points(current_item.pt)
       for next_point in next_points:
-        if not next_point in self.visited_points:
+        if not self.is_visited(next_point):
           risk = self.get_risk(next_point)
           cost = current_item.cost + risk
           next_item = self.get_table_item(next_point)
