@@ -32,16 +32,15 @@ def is_below(pta, ptb):
 def add_pt(pta, ptb):
   return (pta[0] + ptb[0], pta[1] + ptb[1])
 
-def is_inside(pt, bottom_left, top_right):
-  if pt[0] < bottom_left[0]:
+def is_inside(pt, x_min, y_min, x_max, y_max):
+  if pt[0] < x_min:
     return False
-  if pt[0] > top_right[0]:
+  if pt[0] > x_max:
     return False
-  if pt[1] < bottom_left[1]:
+  if pt[1] < y_min:
     return False
-  if pt[1] > top_right[1]:
+  if pt[1] > y_max:
     return False
-  # print(f'pt inside:{pt}')
   return True
 
 def next_vel(vel):
@@ -56,20 +55,22 @@ def next_vel(vel):
   return (dx, dy)
 
 
-def calc_trajectory(start_pt, start_vel, target):
-  (target_bottom_left, target_top_right) = (target[0], target[1])
-  pt = start_pt
+def can_reach_target(start_vel, x_min, y_min, x_max, y_max):
+  pt = (0,0)
   vel = start_vel
-  trajectrory = [pt]
-  while pt[1] >= target_bottom_left[1]:
+  while True:
     pt = add_pt(pt, vel)
     vel = next_vel(vel)
     # print(pt)
-    trajectrory.append(pt)
-    if is_inside(pt, target_bottom_left, target_top_right):
-      return trajectrory
-  # did not hit the target
-  return None
+    if is_inside(pt, x_min, y_min, x_max, y_max):
+      return True
+    if pt[0] > x_max:
+      break
+    if pt[1] < y_min:
+      break
+    if vel[0] == 0 and pt[0] < x_min:
+      break
+  return False
 
 def calc_height(trajectory):
   max_height = 0
@@ -102,36 +103,26 @@ def output(trajectory, target, max_height):
 def get_similar_vels(start_vel):
   (dx,dy) = start_vel
   vels = []
-  for x in range(-50,51):
-    for y in range(-50,51):
+  for x in range(-80,81):
+    for y in range(-80,81):
       vel = (dx+x, dy+y)
       if vel != start_vel:
         vels.append(vel)
   return vels
 
 def calc_possible_velocities(start_pt, target):
-  (target_bottom_left, target_top_right) = (target[0], target[1])
+  ((x_min, y_min), (x_max, y_max)) = (target[0], target[1])
+  vy_max = -y_min -1
   count = 0
-  start_vel = (6,0)
-  start_vel = (23, 98)
-  vels_que = []
-  used_vels = {}
-  vels_que.append(start_vel)
-  while len(vels_que) > 0:
-    vel = vels_que.pop(0)
-    used_vels[vel] = True
-    trajectory = calc_trajectory((0,0), vel, target)
-    if trajectory != None:
-      count = count+1
-      print(vel, count)
-      similar_vels = get_similar_vels(vel)
-      for similar_vel in similar_vels:
-        if used_vels.get(similar_vel) == None:
-          if not similar_vel in vels_que:
-            vels_que.append(similar_vel)
+  for y in range(y_min, vy_max+1):
+    for x in range(1, x_max+1):
+      vel = (x,y)
+      reach_target = can_reach_target(vel, x_min, y_min, x_max, y_max)
+      if reach_target:
+        count = count+1
+        print(vel, count)
 
   return count
-
 
 
 start_pt = (0,0)

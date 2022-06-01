@@ -128,3 +128,7 @@ In the above example, there are 112 different initial velocity values that meet 
 How many distinct initial velocity values cause the probe to be within the target area after any step?
 
 ```
+
+## may be this works
+
+vel-x from 1 .. (right-pos of target)
