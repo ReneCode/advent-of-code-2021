@@ -114,7 +114,7 @@ def calc_velocity_y(start_pt, velx, target):
         # output(trajectory, target, height)
         max_height = height
         max_vely = vely
-        print(vely, max_height)
+        print(f'vel: {(velx,vely)} max height: {max_height}')
     vely = vely +1
   return (max_vely, max_height)
 

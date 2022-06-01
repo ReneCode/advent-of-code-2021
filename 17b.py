@@ -99,25 +99,37 @@ def output(trajectory, target, max_height):
     print(line)
     y = y-1
 
+def get_similar_vels(start_vel):
+  (dx,dy) = start_vel
+  vels = []
+  for x in range(-50,51):
+    for y in range(-50,51):
+      vel = (dx+x, dy+y)
+      if vel != start_vel:
+        vels.append(vel)
+  return vels
 
 def calc_possible_velocities(start_pt, target):
   (target_bottom_left, target_top_right) = (target[0], target[1])
   count = 0
-  vels = []
-
-  vx_min = calc_velocity_x(target_bottom_left[0])
-  vx_max = target_top_right[0]+1
-
-  for vx in range(vx_min, vx_max):
-    vy = target_bottom_left[1]
-    while vy < 50 * abs(target_bottom_left[1]):
-      vels.append((vx, vy))
-      vy = vy +1
-  for vel in vels:
-    trajectory = calc_trajectory(start_pt, vel, target)
+  start_vel = (6,0)
+  start_vel = (23, 98)
+  vels_que = []
+  used_vels = {}
+  vels_que.append(start_vel)
+  while len(vels_que) > 0:
+    vel = vels_que.pop(0)
+    used_vels[vel] = True
+    trajectory = calc_trajectory((0,0), vel, target)
     if trajectory != None:
       count = count+1
-      print(vel)
+      print(vel, count)
+      similar_vels = get_similar_vels(vel)
+      for similar_vel in similar_vels:
+        if used_vels.get(similar_vel) == None:
+          if not similar_vel in vels_que:
+            vels_que.append(similar_vel)
+
   return count
 
 
