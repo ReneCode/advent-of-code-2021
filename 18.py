@@ -6,6 +6,11 @@ import util
 def is_int(obj):
   return isinstance(obj, int)
 
+def is_decimal(string):
+  return string.isdecimal()
+
+def is_pair(obj):
+  return isinstance(obj, Pair)
 
 def pair_to_array(pair):
   items = []
@@ -108,12 +113,54 @@ def add_all(pairs):
   return result
 
 
+class Pair:
+  def __init__(self, left, right):
+    self.left = left
+    self.right = right
 
-lines = util.read_data('./18-example.data')
+  def magnitude(self):
+    result = 0
+    if is_pair(self.left):
+      result = result + 3 * self.left.magnitude()
+    else:
+      result = result + 3 * self.left
+    if is_pair(self.right):
+      result = result + 2 * self.right.magnitude()
+    else:
+      result = result + 2 * self.right
+    return result
+
+def parse_pair(tokens):
+  tok = tokens.pop(0)
+  assert(tok == '[')
+  if is_decimal(tokens[0]):
+    left = int(tokens.pop(0))
+  else:
+    left = parse_pair(tokens)
+  komma = tokens.pop(0)
+  if is_decimal(tokens[0]):
+    right = int(tokens.pop(0))
+  else:
+    right = parse_pair(tokens)
+  tok = tokens.pop(0)
+  assert(tok == ']')
+  return Pair(left, right)
+
+
+def calc_magintude(pair):
+  tokens = [w for w in pair]
+  tree = parse_pair(tokens)
+  return tree.magnitude()
+
+lines = util.read_data('./18.data')
 result = add_all(lines)
 print(result)
+print(calc_magintude(result))
+
+result = '[[[[5,0],[7,4]],[5,5]],[6,6]]'
+# print(calc_magintude(result))
 
 
-pair = '[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]'
+pair = '[[1,2],[[3,4],5]]'
 result = reduce(pair)
 # print(result)
