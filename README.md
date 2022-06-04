@@ -3,132 +3,161 @@
 https://adventofcode.com/2021
 
 ```
---- Day 17: Trick Shot ---
-You finally decode the Elves' message. HI, the message says. You continue searching for the sleigh keys.
+--- Day 18: Snailfish ---
+You descend into the ocean trench and encounter some snailfish. They say they saw the sleigh keys! They'll even tell you which direction the keys went if you help one of the smaller snailfish with his math homework.
 
-Ahead of you is what appears to be a large ocean trench. Could the keys have fallen into it? You'd better send a probe to investigate.
+Snailfish numbers aren't like regular numbers. Instead, every snailfish number is a pair - an ordered list of two elements. Each element of the pair can be either a regular number or another pair.
 
-The probe launcher on your submarine can fire the probe with any integer velocity in the x (forward) and y (upward, or downward if negative) directions. For example, an initial x,y velocity like 0,10 would fire the probe straight up, while an initial velocity like 10,-1 would fire the probe forward at a slight downward angle.
+Pairs are written as [x,y], where x and y are the elements within the pair. Here are some example snailfish numbers, one snailfish number per line:
 
-The probe's x,y position starts at 0,0. Then, it will follow some trajectory by moving in steps. On each step, these changes occur in the following order:
+[1,2]
+[[1,2],3]
+[9,[8,7]]
+[[1,9],[8,5]]
+[[[[1,2],[3,4]],[[5,6],[7,8]]],9]
+[[[9,[3,8]],[[0,9],6]],[[[3,7],[4,9]],3]]
+[[[[1,3],[5,3]],[[1,3],[8,7]]],[[[4,9],[6,9]],[[8,2],[7,3]]]]
+This snailfish homework is about addition. To add two snailfish numbers, form a pair from the left and right parameters of the addition operator. For example, [1,2] + [[3,4],5] becomes [[1,2],[[3,4],5]].
 
-The probe's x position increases by its x velocity.
-The probe's y position increases by its y velocity.
-Due to drag, the probe's x velocity changes by 1 toward the value 0; that is, it decreases by 1 if it is greater than 0, increases by 1 if it is less than 0, or does not change if it is already 0.
-Due to gravity, the probe's y velocity decreases by 1.
-For the probe to successfully make it into the trench, the probe must be on some trajectory that causes it to be within a target area after any step. The submarine computer has already calculated this target area (your puzzle input). For example:
+There's only one problem: snailfish numbers must always be reduced, and the process of adding two snailfish numbers can result in snailfish numbers that need to be reduced.
 
-target area: x=20..30, y=-10..-5
-This target area means that you need to find initial x,y velocity values such that after any step, the probe's x position is at least 20 and at most 30, and the probe's y position is at least -10 and at most -5.
+To reduce a snailfish number, you must repeatedly do the first action in this list that applies to the snailfish number:
 
-Given this target area, one initial velocity that causes the probe to be within the target area after any step is 7,2:
+If any pair is nested inside four pairs, the leftmost such pair explodes.
+If any regular number is 10 or greater, the leftmost such regular number splits.
+Once no action in the above list applies, the snailfish number is reduced.
 
-.............#....#............
-.......#..............#........
-...............................
-S........................#.....
-...............................
-...............................
-...........................#...
-...............................
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-....................TTTTTTTT#TT
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-In this diagram, S is the probe's initial position, 0,0. The x coordinate increases to the right, and the y coordinate increases upward. In the bottom right, positions that are within the target area are shown as T. After each step (until the target area is reached), the position of the probe is marked with #. (The bottom-right # is both a position the probe reaches and a position in the target area.)
+During reduction, at most one action applies, after which the process returns to the top of the list of actions. For example, if split produces a pair that meets the explode criteria, that pair explodes before other splits occur.
 
-Another initial velocity that causes the probe to be within the target area after any step is 6,3:
+To explode a pair, the pair's left value is added to the first regular number to the left of the exploding pair (if any), and the pair's right value is added to the first regular number to the right of the exploding pair (if any). Exploding pairs will always consist of two regular numbers. Then, the entire exploding pair is replaced with the regular number 0.
 
-...............#..#............
-...........#........#..........
-...............................
-......#..............#.........
-...............................
-...............................
-S....................#.........
-...............................
-...............................
-...............................
-.....................#.........
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-....................T#TTTTTTTTT
-....................TTTTTTTTTTT
-Another one is 9,0:
+Here are some examples of a single explode action:
 
-S........#.....................
-.................#.............
-...............................
-........................#......
-...............................
-....................TTTTTTTTTTT
-....................TTTTTTTTTT#
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-....................TTTTTTTTTTT
-One initial velocity that doesn't cause the probe to be within the target area after any step is 17,-4:
+[[[[[9,8],1],2],3],4] becomes [[[[0,9],2],3],4] (the 9 has no regular number to its left, so it is not added to any regular number).
+[7,[6,[5,[4,[3,2]]]]] becomes [7,[6,[5,[7,0]]]] (the 2 has no regular number to its right, and so it is not added to any regular number).
+[[6,[5,[4,[3,2]]]],1] becomes [[6,[5,[7,0]]],3].
+[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]] becomes [[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]] (the pair [3,2] is unaffected because the pair [7,3] is further to the left; [3,2] would explode on the next action).
+[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]] becomes [[3,[2,[8,0]]],[9,[5,[7,0]]]].
+To split a regular number, replace it with a pair; the left element of the pair should be the regular number divided by two and rounded down, while the right element of the pair should be the regular number divided by two and rounded up. For example, 10 becomes [5,5], 11 becomes [5,6], 12 becomes [6,6], and so on.
 
-S..............................................................
-...............................................................
-...............................................................
-...............................................................
-.................#.............................................
-....................TTTTTTTTTTT................................
-....................TTTTTTTTTTT................................
-....................TTTTTTTTTTT................................
-....................TTTTTTTTTTT................................
-....................TTTTTTTTTTT..#.............................
-....................TTTTTTTTTTT................................
-...............................................................
-...............................................................
-...............................................................
-...............................................................
-................................................#..............
-...............................................................
-...............................................................
-...............................................................
-...............................................................
-...............................................................
-...............................................................
-..............................................................#
-The probe appears to pass through the target area, but is never within it after any step. Instead, it continues down and to the right - only the first few steps are shown.
+Here is the process of finding the reduced result of [[[[4,3],4],4],[7,[[8,4],9]]] + [1,1]:
 
-If you're going to fire a highly scientific probe out of a super cool probe launcher, you might as well do it with style. How high can you make the probe go while still reaching the target area?
+after addition: [[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]
+after explode:  [[[[0,7],4],[7,[[8,4],9]]],[1,1]]
+after explode:  [[[[0,7],4],[15,[0,13]]],[1,1]]
+after split:    [[[[0,7],4],[[7,8],[0,13]]],[1,1]]
+after split:    [[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]
+after explode:  [[[[0,7],4],[[7,8],[6,0]]],[8,1]]
+Once no reduce actions apply, the snailfish number that remains is the actual result of the addition operation: [[[[0,7],4],[[7,8],[6,0]]],[8,1]].
 
-In the above example, using an initial velocity of 6,9 is the best you can do, causing the probe to reach a maximum y position of 45. (Any higher initial y velocity causes the probe to overshoot the target area entirely.)
+The homework assignment involves adding up a list of snailfish numbers (your puzzle input). The snailfish numbers are each listed on a separate line. Add the first snailfish number and the second, then add that result and the third, then add that result and the fourth, and so on until all numbers in the list have been used once.
 
-Find the initial velocity that causes the probe to reach the highest y position and still eventually be within the target area after any step. What is the highest y position it reaches on this trajectory?
+For example, the final sum of this list is [[[[1,1],[2,2]],[3,3]],[4,4]]:
+
+[1,1]
+[2,2]
+[3,3]
+[4,4]
+The final sum of this list is [[[[3,0],[5,3]],[4,4]],[5,5]]:
+
+[1,1]
+[2,2]
+[3,3]
+[4,4]
+[5,5]
+The final sum of this list is [[[[5,0],[7,4]],[5,5]],[6,6]]:
+
+[1,1]
+[2,2]
+[3,3]
+[4,4]
+[5,5]
+[6,6]
+Here's a slightly larger example:
+
+[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
+[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
+[[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]
+[[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]
+[7,[5,[[3,8],[1,4]]]]
+[[2,[2,2]],[8,[8,1]]]
+[2,9]
+[1,[[[9,3],9],[[9,0],[0,7]]]]
+[[[5,[7,4]],7],1]
+[[[[4,2],2],6],[8,7]]
+The final sum [[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]] is found after adding up the above snailfish numbers:
+
+  [[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
++ [7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
+= [[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]
+
+  [[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]
++ [[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]
+= [[[[6,7],[6,7]],[[7,7],[0,7]]],[[[8,7],[7,7]],[[8,8],[8,0]]]]
+
+  [[[[6,7],[6,7]],[[7,7],[0,7]]],[[[8,7],[7,7]],[[8,8],[8,0]]]]
++ [[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]
+= [[[[7,0],[7,7]],[[7,7],[7,8]]],[[[7,7],[8,8]],[[7,7],[8,7]]]]
+
+  [[[[7,0],[7,7]],[[7,7],[7,8]]],[[[7,7],[8,8]],[[7,7],[8,7]]]]
++ [7,[5,[[3,8],[1,4]]]]
+= [[[[7,7],[7,8]],[[9,5],[8,7]]],[[[6,8],[0,8]],[[9,9],[9,0]]]]
+
+  [[[[7,7],[7,8]],[[9,5],[8,7]]],[[[6,8],[0,8]],[[9,9],[9,0]]]]
++ [[2,[2,2]],[8,[8,1]]]
+= [[[[6,6],[6,6]],[[6,0],[6,7]]],[[[7,7],[8,9]],[8,[8,1]]]]
+
+  [[[[6,6],[6,6]],[[6,0],[6,7]]],[[[7,7],[8,9]],[8,[8,1]]]]
++ [2,9]
+= [[[[6,6],[7,7]],[[0,7],[7,7]]],[[[5,5],[5,6]],9]]
+
+  [[[[6,6],[7,7]],[[0,7],[7,7]]],[[[5,5],[5,6]],9]]
++ [1,[[[9,3],9],[[9,0],[0,7]]]]
+= [[[[7,8],[6,7]],[[6,8],[0,8]]],[[[7,7],[5,0]],[[5,5],[5,6]]]]
+
+  [[[[7,8],[6,7]],[[6,8],[0,8]]],[[[7,7],[5,0]],[[5,5],[5,6]]]]
++ [[[5,[7,4]],7],1]
+= [[[[7,7],[7,7]],[[8,7],[8,7]]],[[[7,0],[7,7]],9]]
+
+  [[[[7,7],[7,7]],[[8,7],[8,7]]],[[[7,0],[7,7]],9]]
++ [[[[4,2],2],6],[8,7]]
+= [[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]
+To check whether it's the right answer, the snailfish teacher only checks the magnitude of the final sum. The magnitude of a pair is 3 times the magnitude of its left element plus 2 times the magnitude of its right element. The magnitude of a regular number is just that number.
+
+For example, the magnitude of [9,1] is 3*9 + 2*1 = 29; the magnitude of [1,9] is 3*1 + 2*9 = 21. Magnitude calculations are recursive: the magnitude of [[9,1],[1,9]] is 3*29 + 2*21 = 129.
+
+Here are a few more magnitude examples:
+
+[[1,2],[[3,4],5]] becomes 143.
+[[[[0,7],4],[[7,8],[6,0]]],[8,1]] becomes 1384.
+[[[[1,1],[2,2]],[3,3]],[4,4]] becomes 445.
+[[[[3,0],[5,3]],[4,4]],[5,5]] becomes 791.
+[[[[5,0],[7,4]],[5,5]],[6,6]] becomes 1137.
+[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]] becomes 3488.
+So, given this example homework assignment:
+
+[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+[[[5,[2,8]],4],[5,[[9,9],0]]]
+[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
+[[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
+[[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]
+[[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]
+[[[[5,4],[7,7]],8],[[8,3],8]]
+[[9,3],[[9,9],[6,[4,9]]]]
+[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
+[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]
+The final sum is:
+
+[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]
+The magnitude of this final sum is 4140.
+
+Add up all of the snailfish numbers from the homework assignment in the order they appear. What is the magnitude of the final sum?
+
+To begin, get your puzzle input.
+
+Answer:
 
 
---- Part Two ---
-Maybe a fancy trick shot isn't the best idea; after all, you only have one probe, so you had better not miss.
-
-To get the best idea of what your options are for launching the probe, you need to find every initial velocity that causes the probe to eventually be within the target area after any step.
-
-In the above example, there are 112 different initial velocity values that meet these criteria:
-
-23,-10  25,-9   27,-5   29,-6   22,-6   21,-7   9,0     27,-7   24,-5
-25,-7   26,-6   25,-5   6,8     11,-2   20,-5   29,-10  6,3     28,-7
-8,0     30,-6   29,-8   20,-10  6,7     6,4     6,1     14,-4   21,-6
-26,-10  7,-1    7,7     8,-1    21,-9   6,2     20,-7   30,-10  14,-3
-20,-8   13,-2   7,3     28,-8   29,-9   15,-3   22,-5   26,-8   25,-8
-25,-6   15,-4   9,-2    15,-2   12,-2   28,-9   12,-3   24,-6   23,-7
-25,-10  7,8     11,-3   26,-7   7,1     23,-9   6,0     22,-10  27,-6
-8,1     22,-8   13,-4   7,6     28,-6   11,-4   12,-4   26,-9   7,4
-24,-10  23,-8   30,-8   7,0     9,-1    10,-1   26,-5   22,-9   6,5
-7,5     23,-6   28,-10  10,-2   11,-1   20,-9   14,-2   29,-7   13,-3
-23,-5   24,-8   27,-9   30,-7   28,-5   21,-10  7,9     6,6     21,-5
-27,-10  7,2     30,-9   21,-8   22,-7   24,-9   20,-6   6,9     29,-5
-8,-2    27,-8   30,-5   24,-7
-How many distinct initial velocity values cause the probe to be within the target area after any step?
+You can also [Share] this puzzle.
 
 ```
-
-## may be this works
-
-vel-x from 1 .. (right-pos of target)
