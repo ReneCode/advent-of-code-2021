@@ -152,15 +152,22 @@ def calc_magintude(pair):
   tree = parse_pair(tokens)
   return tree.magnitude()
 
-lines = util.read_data('./18.data')
-result = add_all(lines)
-print(result)
-print(calc_magintude(result))
+def part_1():
+  lines = util.read_data('./18-example.data')
+  result = add_all(lines)
+  print(result)
+  print(calc_magintude(result))
 
-result = '[[[[5,0],[7,4]],[5,5]],[6,6]]'
-# print(calc_magintude(result))
+def part_2():
+  lines = util.read_data('./18.data')
+  max_magnitude = 0
+  for i in range(len(lines)):
+    for j in range(len(lines)):
+      if i != j:
+        result = add(lines[i], lines[j])
+        magnitude = calc_magintude(result)
+        max_magnitude = max(max_magnitude, magnitude)
+        print(f'{i} {j} {magnitude}')
+  print(f'max magnitude: {max_magnitude}')
 
-
-pair = '[[1,2],[[3,4],5]]'
-result = reduce(pair)
-# print(result)
+part_2()
