@@ -11,6 +11,10 @@ def add(p1, p2):
   return (p1[0]+p2[0], p1[1]+p2[1], p1[2]+p2[2])
 
 
+def manhatten_distance(v1, v2):
+  (dx,dy,dz)= sub(v1, v2)
+  return abs(dx) + abs(dy) + abs(dz)
+
 class Matrix:
   #
   # (a, d, g, j)

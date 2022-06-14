@@ -145,8 +145,6 @@ def check_overlap(idx):
           check_overlap(i)
 
 
-
-
 scanners = read_data('./19.data')
 scanners[0].set_offset((0,0,0))
 scanners[0].set_mapping((1,2,3))
@@ -162,6 +160,14 @@ for scanner in scanners:
 
 # print(all_points)
 print(f'count all points: {len(all_points)}')
+
+max_distance = 0
+for sa in scanners:
+  for sb in scanners:
+    dist = vector.manhatten_distance(sa.offset, sb.offset)
+    max_distance = max(dist, max_distance)
+
+print(f'max distance: {max_distance}')
 
 # print(points2)
 
