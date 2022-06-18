@@ -13,13 +13,83 @@ class Image:
     self.col_max = len(lines[0])-1
     self.row_min = 0
     self.row_max = len(lines)-1
-    for row,image_line in enumerate(lines):
-      for col,val in enumerate(lines):
+    for row,line in enumerate(lines):
+      for col,val in enumerate(line):
+        pos = (col,row)
         if val == LIGHT_ON:
-          pos = (col,row)
           self.positions[pos] = True
+        else:
+          self.positions[pos] = False
 
+  def output(self):
+    print('------------')
+    count_on = 0
+    border = 0
+    for row in range(self.row_min-border, self.row_max+1 + border):
+      line = ""
+      for col in range(self.col_min-border, self.col_max+1 + border):
+        pos = (col, row)
+        if self.positions.get(pos):
+          line = line + LIGHT_ON
+          count_on = count_on + 1
+        else:
+          line = line + LIGHT_OFF
+      print(line)
+    return count_on
 
+  def add_border(self, val, width):
+    if width == 0:
+      return
+
+    self.col_min = self.col_min-1
+    self.col_max = self.col_max+1
+    self.row_min = self.row_min-1
+    self.row_max = self.row_max+1
+    for col in range(self.col_min, self.col_max+1):
+      # top
+      pos = (col, self.row_min)
+      self.positions[pos] = val
+      # bottom
+      pos = (col, self.row_max)
+      self.positions[pos] = val
+    for row in range(self.row_min, self.row_max+1):
+      # left
+      pos = (self.col_min, row)
+      self.positions[pos] = val
+      pos = (self.col_max, row)
+      self.positions[pos] = val
+    self.add_border(val, width-1)
+
+  def get_bit_val(self, col, row):
+    bits = ""
+    for r in range(row-1, row+2):
+      for c in range(col-1, col+2):
+        pos = (c, r)
+        bit = "0"
+        if self.positions[pos]:
+          bit = "1"
+        bits = bits + bit
+    val = int(bits, 2)
+    return val
+
+  def calc_next(self, algo):
+    # take border val from top,left
+    border_pos = (self.col_min, self.row_min)
+    border_val = self.positions[border_pos]
+    self.add_border(border_val, 2)
+    border = 0
+    result_lines = []
+    for row in range(self.row_min+1, self.row_max):
+      line = ""
+      for col in range(self.col_min+1, self.col_max):
+        bit_val = self.get_bit_val(col, row)
+        result_val = algo[bit_val]
+        w = LIGHT_OFF
+        if result_val:
+          w = LIGHT_ON
+        line = line + w
+      result_lines.append(line)
+    return Image(result_lines)
 
 def read_data(filename):
   lines = util.read_data(filename)
@@ -42,14 +112,7 @@ def read_data(filename):
     else:
       algo[i] = False
 
-  # store image in position-dict
-  image = {}
-  for row,image_line in enumerate(image_lines):
-    for col,val in enumerate(image_line):
-      if val == LIGHT_ON:
-        pos = (col,row)
-        image[pos] = True
-  return (algo, image)
+  return (algo, image_lines)
 
 def get_image_boundary(image):
   col_min = 0
@@ -64,53 +127,22 @@ def get_image_boundary(image):
     row_max = max(row_max, row)
   return (col_min, col_max, row_min, row_max)
 
-def output(image):
-  print('------------')
-  (col_min, col_max, row_min, row_max) = get_image_boundary(image)
-  count_on = 0
-  border = 0
-  for row in range(row_min-border, row_max+1 + border):
-    line = ""
-    for col in range(col_min-border, col_max+1 + border):
-      pos = (col, row)
-      if image.get(pos):
-        line = line + LIGHT_ON
-        count_on = count_on + 1
-      else:
-        line = line + LIGHT_OFF
-    print(line)
-  return count_on
 
-def get_bit_val(image, col, row):
-  bits = ""
-  for r in range(row-1, row+2):
-    for c in range(col-1, col+2):
-      pos = (c, r)
-      bit = "0"
-      if image.get(pos):
-        bit = "1"
-      bits = bits + bit
-  val = int(bits, 2)
-  return val
 
-def calc(image, algo):
-  (col_min, col_max, row_min, row_max) = get_image_boundary(image)
-  border = 5
-  result = {}
-  for row in range(row_min-border, row_max+1 +border):
-    for col in range(col_min-border, col_max+1 +border):
-      bit_val = get_bit_val(image, col, row)
-      if algo[bit_val]:
-        result_pos = (col, row)
-        result[result_pos] = True
-  return result
 
-(algo, image) = read_data('./20.data')
+
+(algo, image_lines) = read_data('./20.data')
+image = Image(image_lines)
+image.add_border(False, 1)
 # print(algo)
-output(image)
-image = calc(image, algo)
-output(image)
-image = calc(image, algo)
-count = output(image)
+image.output()
+image = image.calc_next(algo)
+image.output()
+image = image.calc_next(algo)
+count = image.output()
+# image = calc(image, algo)
+# output(image)
+# image = calc(image, algo)
+# count = output(image)
 print(f'pixels on: {count}')
 
