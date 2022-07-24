@@ -3,19 +3,6 @@
 
 import util
 
-COORD_X = 0
-COORD_Y = 1
-COORD_Z = 2
-
-def inside(rg, x):
-  return rg[0] <= x and x <= rg[1]
-
-def left_from(rg, x):
-  return x < rg[0]
-
-def right_from(rg, x):
-  return rg[1] < x
-
 
 """
 cut_out
@@ -92,33 +79,15 @@ class Box:
     self.z = z
 
   def __repr__(self):
-    xr = f'x:{self.x[0]}-{self.x[1]}'
-    yr = f'y:{self.y[0]}-{self.y[1]}'
-    zr = f'z:{self.z[0]}-{self.z[1]}'
+    xr = f'x:{self.x[0]}/{self.x[1]}'
+    yr = f'y:{self.y[0]}/{self.y[1]}'
+    zr = f'z:{self.z[0]}/{self.z[1]}'
     return f'{xr} {yr} {zr}'
 
   def __eq__(self, o):
     if isinstance(self, o.__class__):
       return self.x == o.x and self.y == o.y and self.z == o.z
     return False
-
-  def intercept(self, other):
-    # x
-    if self.x[0] > other.x[1]:
-      return False  # self is right of other
-    if self.x[1] < other.x[0]:
-      return False  # self is left of other
-    # y
-    if self.y[0] > other.y[1]:
-      return False  # self is right of other
-    if self.y[1] < other.y[0]:
-      return False  # self is left of other
-    # z
-    if self.z[0] > other.z[1]:
-      return False  # self is right of other
-    if self.z[1] < other.z[0]:
-      return False  # self is left of other
-    return True
 
   def cutout(self, cut_box):
     rest_boxes = []
@@ -150,6 +119,8 @@ class Box:
       # this is the cutout
       box = Box(box.x, box.y, result_z[1])
 
+    if len(rest_boxes) == 0:
+      rest_boxes.append(self)
     return rest_boxes
 
 
@@ -174,22 +145,21 @@ def read_data(filename):
 
 
 
-
-def add_box(box_a, box_b):
-  result = [box_a]
-#   for box in result:
-
-
-
-#   for box in boxes:
-#     result.extend( box.split('x', add_box.x[0]) )
-#     result.extend( box.split('x', add_box.x[1]) )
-
 data = read_data('./22.data')
 boxes = []
 for d in data:
   on = d[0]
   box = d[1]
-    
+  if len(boxes) == 0 and on:
+    boxes.append(box)
+  else:
+    next_boxes = []
+    for b in boxes:
+      result = b.cutout(box)
+      next_boxes.extend(result)
+    boxes = next_boxes
+    if on:
+      boxes.append(box)
+print(len(boxes))    
 
 

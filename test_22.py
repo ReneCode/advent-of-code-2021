@@ -38,6 +38,13 @@ def test_cutout_2():
   ]
   assert result == expect
 
+def test_cutout_boxes_do_not_entersect():
+  box_a = t.Box((10,30), (20,40), (30,50))
+  box_b = t.Box((1,2), (2,5), (60,70))
+  result = box_a.cutout(box_b)
+  expect = [
+    box_a
+  ]
+  assert result == expect
 
 
-test_cutout_1()
