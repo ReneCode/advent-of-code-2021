@@ -88,7 +88,7 @@ def sub_dict(a, b):
       del result[key]
   return result
 
-data = read_data('./22.data')
+data = read_data('./22-example-1.data')
 result = {}
 xrange = (-50,50)
 yrange = (-50,50)

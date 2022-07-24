@@ -72,6 +72,13 @@ def get_left_cut_right(rg_a, rg_b):
   cut = (max(rg_a[0], rg_b[0]), min(rg_a[1], rg_b[1]))
   return (left, cut, right)
 
+
+def boxes_volume(boxes):
+  volume = 0
+  for b in boxes:
+    volume += b.volume()
+  return volume
+
 class Box:
   def __init__(self, x, y, z):
     self.x = x
@@ -89,7 +96,34 @@ class Box:
       return self.x == o.x and self.y == o.y and self.z == o.z
     return False
 
+  def intercept(self, other):
+    # x
+    if self.x[0] > other.x[1]:
+      return False  # self is right of other
+    if self.x[1] < other.x[0]:
+      return False  # self is left of other
+    # y
+    if self.y[0] > other.y[1]:
+      return False  # self is right of other
+    if self.y[1] < other.y[0]:
+      return False  # self is left of other
+    # z
+    if self.z[0] > other.z[1]:
+      return False  # self is right of other
+    if self.z[1] < other.z[0]:
+      return False  # self is left of other
+    return True
+
+  def volume(self):
+    dx = self.x[1] - self.x[0] + 1
+    dy = self.y[1] - self.y[0] + 1
+    dz = self.z[1] - self.z[0] + 1
+    return dx * dy * dz
+
   def cutout(self, cut_box):
+    if self.intercept(cut_box) == False:
+      return [self]
+
     rest_boxes = []
     box = self
     result_x = get_left_cut_right(box.x, cut_box.x)
@@ -119,8 +153,6 @@ class Box:
       # this is the cutout
       box = Box(box.x, box.y, result_z[1])
 
-    if len(rest_boxes) == 0:
-      rest_boxes.append(self)
     return rest_boxes
 
 
@@ -147,9 +179,12 @@ def read_data(filename):
 
 data = read_data('./22.data')
 boxes = []
+nr = 0
 for d in data:
+  nr += 1
   on = d[0]
   box = d[1]
+  print(f'processing on: {on} box: {box}')
   if len(boxes) == 0 and on:
     boxes.append(box)
   else:
@@ -160,6 +195,11 @@ for d in data:
     boxes = next_boxes
     if on:
       boxes.append(box)
-print(len(boxes))    
+
+
+volume = 0
+for b in boxes:
+  volume += b.volume()
+print(len(boxes), volume)    
 
 
